@@ -66,19 +66,24 @@ $ export KUBECONFIG=$(pwd)/kubeconfig
        vol = await NotebookRunner('volume.ipynb', date='20210101')
        assert vol == 46500012
    ```
+1. Make sure the test passes:
+   ```bash
+   $ cowait build
+   $ cowait test
+   ```
+1. Now is a good time to save your progress. Since the files are available on your local machine, use your git client to create a commit.
+   ```bash
+   $ git add .
+   $ git commit -m 'Volume notebook works'
+   ```
 
 ### todo
-- create a notebook
-- import code to download bitmex trading data
-- (add pandas dependency. rebuild image & restart notebook)
-- calculate OHLC values using pandas in a notebook
-- create a simple test for the notebook
-- commit your work
-- parameterize the notebook (input date, return total volume or similar)
 - create a new notebook to launch several instances in parallel
 - once it works, rewrite the notebook as a task
 - launch the task from CLI
 - commit your work
 
 ## Evaluation
-
+- Briefly describe your overall impression of working with Cowait notebooks
+- Do you think Cowait notebooks could help improve the workflow in your organization? Why/why not? 
+- Do you see any advantage in having access to your local file system when working in a cloud notebook? Any drawbacks?
