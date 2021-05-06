@@ -4,24 +4,17 @@
 - git
 - Docker
 - Python 3.7
-- Poetry
-- Cowait 0.4.21
 
 ### Initial Setup
+- Install Cowait:
+  ```bash
+  $ pip3 install cowait
+  ```
 - Check out the repository:
   ```bash
   $ git clone https://github.com/backtick-se/cowait-notebook-eval
   $ cd cowait-notebook-eval
   ```
-- Download the clientfs client for your platform
-  - OSX:
-    ```bash
-    $ wget .... -O clientfs
-    ```
-  - Linux
-    ```bash
-    $ wget .... -O clientfs
-    ```
 
 ### Cluster Configuration
 

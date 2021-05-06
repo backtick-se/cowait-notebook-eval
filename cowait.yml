@@ -1,0 +1,6 @@
+version: 1
+cowait:
+  image: 'your-image-name'
+  features:
+    notebook: true
+
