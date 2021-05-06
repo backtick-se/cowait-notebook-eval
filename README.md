@@ -29,25 +29,29 @@ $ export KUBECONFIG=$(pwd)/kubeconfig
 
 ### Part 1: The notebook
 
-1. Launch the Cowait Notebook using the provided base image. The image is pre-built with the necessary dependencies. 
+1. Create a `requirements.txt` file and add `pandas`
+1. Open `cowait.yml` and set the image name
+1. Build and push the notebook image:
+   ```bash
+   $ cowait build --push
+   ```
+1. Launch the Cowait Notebook: 
    ```bash
    $ cowait notebook -c kubernetes
    ```
    When the task is running, a link should be displayed. Open it to access the notebook.
-1. Create a new notebook using the Cowait interpreter.
-1. First, we will import some code to download sample data:
-   ```python
-   from sample_data import download_daily_trades
-   ```
+1. Create a new notebook using the Cowait interpreter. Give it the name `volume.ipynb`
 1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex derivatives platform.
    ```python
-   df = pandas.read_csv('http://public.bitmex.com .... ')
+   date = '20210101'
+   df = pandas.read_csv(f'https://s3-eu-west-1.amazonaws.com/public.bitmex.com/data/trade/{date}.csv.gz')
    ```
 1. Compute the total daily volume for the `XBTUSD` instrument using pandas:
    ```python
    volume = df[df.symbol == 'XBTUSD'].size.sum()
+   print(volume)
    ```
-1. Parameterize the notebook by using an input parameter:
+1. Parameterize the notebook by changing the date variable to an input parameter:
    ```python
    date = cowait.input('date', '20200101')
    ```
@@ -56,10 +60,14 @@ $ export KUBECONFIG=$(pwd)/kubeconfig
    cowait.exit(volume)
    ```
 1. Write a simple sanity test for the notebook that verifies the computation for a date with a known volume.
+   
+   **TODO: Explain NotebookRunner**
    ```python
    # test_compute_volume.py
+   from cowait.tasks.notebook import NotebookRunner
+
    async def test_compute_volume():
-       vol = await NotebookRunner('volume.ipynb', date='20210101')
+       vol = await NotebookRunner(path='volume.ipynb', date='20210101')
        assert vol == 46500012
    ```
 1. Make sure the test passes:
@@ -80,10 +88,10 @@ We now have a notebook for calculating the volume for one day. But what if we wa
 1. Create a new notebook in the same way as above (we will refer to it as `notebook_batch.ipynb`)
 2. Invoke the Volume notebook a few times:
    ```python
-   day1 = NotebookRunner('volume.ipynb', date='20210101')
-   day2 = NotebookRunner('volume.ipynb', date='20210102')
-   day3 = NotebookRunner('volume.ipynb', date='20210103')
-   day4 = NotebookRunner('volume.ipynb', date='20210104')
+   day1 = NotebookRunner(path='volume.ipynb', date='20210101')
+   day2 = NotebookRunner(path='volume.ipynb', date='20210102')
+   day3 = NotebookRunner(path='volume.ipynb', date='20210103')
+   day4 = NotebookRunner(path='volume.ipynb', date='20210104')
    ```
    This will start four new tasks, each calculating the volume for one day. While these are running the notebook can perform other calculations.
 3. To get the results of the calculations we need to wait:
@@ -105,11 +113,12 @@ We now have a notebook for calculating the volume for one day. But what if we wa
 5. Parameterize the notebook using `cowait.input` and return the results using `cowait.exit`:
    ```python
    # notebook_batch.ipynb
+   from helpers import daterange
 
-   start_day = cowait.input('start_day', 1)
-   end_day = cowait.input('end_day', 4)
+   start_day = cowait.input('start_day', '20210101')
+   end_day = cowait.input('end_day', '20210110')
 
-   dates = [f'202101{day:02}' for day in range(start_day, end_day+1)]
+   dates = [date for day in daterange(start_day, end_day)]
    
    runners = [NotebookRunner('volume.ipynb', date=date) for date in dates]
 
@@ -142,7 +151,7 @@ We now have a runnable notebook, and it is time to put it into production. Inste
 
 2. The notebook can now be run on the cluster by adding `-c kubernetes`:
    ```bash
-   $ cowait notebook run run notebook_batch -c kubernetes -i start_day=7 -i end_day=12
+   $ cowait notebook run run notebook_batch -c kubernetes -i start_day=20210201 -i end_day=20210210
    ```
 
 ## Evaluation
