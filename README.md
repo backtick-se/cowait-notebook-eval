@@ -16,6 +16,10 @@
   $ cd cowait-notebook-eval
   ```
 
+### Docker Registry
+
+You will need an image registry to distribute your code to the cluster. The easiest way is to sign up for a free account on Docker Hub at https://hub.docker.com/signup 
+
 ### Cluster Configuration
 
 Participants of the evaluation study should have received a `kubeconfig` file that can be used to access the evaluation cluster. If you are not participating in the evaluation, you will have to set up your own Cowait cluster. A traefik2 reverse proxy deployment is required.
@@ -30,16 +34,16 @@ $ export KUBECONFIG=$(pwd)/kubeconfig
 ### Part 1: The notebook
 
 1. Create a `requirements.txt` file and add `pandas`
-1. Open `cowait.yml` and set the image name
+1. Open `cowait.yml` and update the `image` field to `<your dockerhub username>/cowait-notebook-eval`
 1. Build and push the notebook image:
    ```bash
    $ cowait build --push
    ```
-1. Launch the Cowait Notebook: 
+1. Launch a Cowait Notebook using your newly created image: 
    ```bash
    $ cowait notebook -c kubernetes
    ```
-   When the task is running, a link should be displayed. Open it to access the notebook.
+   It might take a few minutes for the cluster to download the image. Once the task is running, a link should be displayed. Open it to access the notebook.
 1. Create a new notebook using the Cowait interpreter. Give it the name `volume.ipynb`
 1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex derivatives platform.
    ```python
@@ -72,7 +76,6 @@ $ export KUBECONFIG=$(pwd)/kubeconfig
    ```
 1. Make sure the test passes:
    ```bash
-   $ cowait build
    $ cowait test
    ```
 1. Now is a good time to save your progress. Since the files are available on your local machine, use your git client to create a commit.
@@ -83,57 +86,39 @@ $ export KUBECONFIG=$(pwd)/kubeconfig
 
 ### Part 2: Going parallel
 
-We now have a notebook for calculating the volume for one day. But what if we want the volume for several days?
+We now have a notebook for calculating the volume for one day. But what if we want the volume for several days? While we could create a loop and download each day in sequence, it would be much more efficient to do it all at once, in parallel.
 
-1. Create a new notebook in the same way as above (we will refer to it as `notebook_batch.ipynb`)
-2. Invoke the Volume notebook a few times:
+1. Create a new notebook in the same way as above (we will refer to it as `batch.ipynb`)
+1. First, we will create two input parameters and create a range of dates that we are interested in.
    ```python
-   day1 = NotebookRunner(path='volume.ipynb', date='20210101')
-   day2 = NotebookRunner(path='volume.ipynb', date='20210102')
-   day3 = NotebookRunner(path='volume.ipynb', date='20210103')
-   day4 = NotebookRunner(path='volume.ipynb', date='20210104')
+   from helpers import daterange
+
+   start = cowait.input('start', '20210101')
+   end = cowait.input('end', '20210110')
+
+   dates = [ date for date in daterange(start, end) ]
+   dates
    ```
-   This will start four new tasks, each calculating the volume for one day. While these are running the notebook can perform other calculations.
-3. To get the results of the calculations we need to wait:
+1. Then, we can create a `NotebookRunner` for each date in the list.  This will start four new tasks, each calculating the volume for one day. While these are running the notebook can perform other calculations.
    ```python
-   result1 = await day1
-   result2 = await day2
-   result3 = await day3
-   result4 = await day4
+   subtasks = [ NotebookRunner(path='volume.ipynb', date=date) for date in dates ]
    ```
-   This can also be done with `cowait.join`:
+1. To get the results of the calculations we need to wait for each task to finish:
    ```python
-   results = await cowait.join([day1, day2, day3, day4])
+   # just for reference, dont try to run this
+   result1 = await task1
+   result2 = await task2
    ```
-4. Finally let's print the results:
+   Since we have a list of pending tasks, we can use `cowait.join`. Create a new cell with the following code:
+   ```python
+   results = await cowait.join(subtasks)
+   ```
+1. Finally let's print the results:
    ```python
    print(results)
    ```
-   If you now run all the cells in the notebook there should be some results printed. This will run the tasks on the cluster.
-5. Parameterize the notebook using `cowait.input` and return the results using `cowait.exit`:
-   ```python
-   # notebook_batch.ipynb
-   from helpers import daterange
-
-   start_day = cowait.input('start_day', '20210101')
-   end_day = cowait.input('end_day', '20210110')
-
-   dates = [date for day in daterange(start_day, end_day)]
-   
-   runners = [NotebookRunner('volume.ipynb', date=date) for date in dates]
-
-   results = await cowait.join(runners)
-
-   cowait.exit(results)
-   ```
-   The notebook should still be runnable in Jupyter, and will use the default values for the inputs. 
-6. The notebook can now be run as a task from the command line.
-   ```bash
-   $ cowait build
-   $ cowait notebook run notebook_batch -i start_day=7 -i end_day=12
-   ```
-   This will run the tasks as containers on the local computer.
-7. Now is a good time to save your progress.
+1. Use the `Run All Cells` feature in the `Run` menu to try out the notebook. This will run the tasks on the cluster.
+1. Now is a good time to save your progress.
    ```bash
    $ git add .
    $ git commit -m 'Volume batch notebook works'
@@ -141,17 +126,16 @@ We now have a notebook for calculating the volume for one day. But what if we wa
 
 ### Part 3: Production
 
-We now have a runnable notebook, and it is time to put it into production. Instead of running the tasks on the local computer we will run the tasks on a cluster.
+We now have a runnable notebook, and it is time to put it into production. We can run the `batch` notebook without Jupyter using the command line.
 
 1. Before we can run the tasks on the cluster we have to push the image to a docker registry:
    ```bash
-   $ cowait build
-   $ cowait push
+   $ cowait build --push
    ```
 
 2. The notebook can now be run on the cluster by adding `-c kubernetes`:
    ```bash
-   $ cowait notebook run run notebook_batch -c kubernetes -i start_day=20210201 -i end_day=20210210
+   $ cowait notebook run batch -c kubernetes -i start=20210201 -i end=20210210
    ```
 
 ## Evaluation
