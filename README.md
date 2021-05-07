@@ -32,11 +32,11 @@ $ docker login
 
 ### Cluster Configuration
 
-Participants of the evaluation study should have received a `kubeconfig` file that can be used to access the evaluation cluster. If you are not participating in the evaluation, you will have to set up your own Cowait cluster. A traefik2 reverse proxy deployment is required.
+Participants of the evaluation study should have received a `kubeconfig.yaml` file that can be used to access the evaluation cluster. If you are not participating in the evaluation, you will have to set up your own Cowait cluster. A traefik2 reverse proxy deployment is required.
 
 Put the provided kubeconfig file in the current working directory. Then, set the `KUBECONFIG` environment variable:
 ```bash
-$ export KUBECONFIG=$(pwd)/kubeconfig
+$ export KUBECONFIG=$(pwd)/kubeconfig.yaml
 ```
 
 ## Lab
@@ -56,7 +56,7 @@ The goal of part one is to create a notebook that computes a value we are intere
 
 1. Launch a Cowait Notebook using your newly created image: 
    ```bash
-   $ cowait notebook --cluster kubernetes
+   $ cowait notebook --cluster demo
    ```
    It might take a few minutes for the cluster to download the image. Once the task is running, a link should be displayed. Open it to access the notebook.
 
@@ -177,7 +177,7 @@ We now have a runnable notebook, and it is time to put it into production. We ca
 2. The notebook can now be executed on the cluster as a batch job for a range of dates:
    ```bash
    $ cowait notebook run batch.ipynb \
-       --cluster kubernetes \
+       --cluster demo \
        --input start=20210201 \
        --input end=20210210
    ```

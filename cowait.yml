@@ -4,10 +4,12 @@ cowait:
   features:
     notebook: true
   clusters:
-    kubernetes:
+    demo:
       type: kubernetes
       domain: demo.cowait.io
       router: traefik2
       traefik2:
-        secure: true
+        certresolver: default
+      clientfs:
+        host: fs.demo.cowait.io:9091
 
