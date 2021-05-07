@@ -60,27 +60,27 @@ The goal of part one is to create a notebook that computes a value we are intere
    ```
    It might take a few minutes for the cluster to download the image. Once the task is running, a link should be displayed. Open it to access the notebook.
 
-1. Create a new notebook called `volume.ipynb`. Make sure to select the Cowait interpreter.
+1. Create a new notebook called `volume.ipynb`. Make sure to select the Cowait kernel.
 
 1. Take a moment to appreciate the magic of `clientfs`
 
    **TODO: How? Briefly explain clientfs**
 
-1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex cryptocurrency derivatives platform. 
+1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex cryptocurrency derivatives platform, divided into one file per day. 
 
    ```python
    date = '20210101'
    df = pandas.read_csv(f'https://s3-eu-west-1.amazonaws.com/public.bitmex.com/data/trade/{date}.csv.gz')
    ```
 
-1. We want to compute the total daily dollar amount of Bitcoin contracts traded using pandas. Bitcoin Perpetual Futures contracts have the ticker symbol `XBTUSD`. To do this, we need to find all the rows containing `XBTUSD` transactions, and sum their size.
+1. We want to compute the total US dollar value of Bitcoin contracts over the course of the day. Bitcoin Perpetual Futures contracts have the ticker symbol `XBTUSD`. To do this, use pandas to find all the rows containing `XBTUSD` transactions, and sum the `size` column.
 
    ```python
    volume = df[df.symbol == 'XBTUSD'].size.sum()
    print(volume)
    ```
 
-1. Parameterize the notebook by changing the date variable to an input parameter. In Cowait, *inputs* allow us to send arguments to tasks. Later, we can substitute the input value to execute the notebook code for any date we like. If no input is set, the default date `20210101` will be used.
+1. Parameterize the notebook by changing the date variable to an input parameter. In Cowait, *inputs* allow us to send arguments to tasks. Later, we can substitute the input value to execute the notebook code for any date we like. If no input is set, the default value `20210101` will be used.
   
    ```python
    date = cowait.input('date', '20210101')

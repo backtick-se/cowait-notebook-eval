@@ -3,4 +3,11 @@ cowait:
   image: '<your dockerhub username>/cowait-notebook-eval'
   features:
     notebook: true
+  clusters:
+    kubernetes:
+      type: kubernetes
+      domain: demo.cowait.io
+      router: traefik2
+      traefik2:
+        secure: true
 
