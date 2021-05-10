@@ -2,7 +2,13 @@
 
 ## Introduction
 
-**TODO: Write about what Cowait is, what cowait notebooks are and what this lab is about**
+Cowait is a system for packaging a project with its dependencies into a Docker image, which can then be run as a container either on the local machine or on a Kubernetes cluster. It alleviates several problems in data engineering such as dependency management, reproducibility, version control and parallel computation. Cowait runs code as tasks, and a task can start subtasks with parameters and return values. These subtasks run in parallel as separate containers, which enables parallel computation.
+
+A Cowait notebook is essentially a Jupyter notebook running with a Cowait kernel. This enables the notebook to act as if it was as Cowait task, which enables it to start new Cowait tasks in parallel. The notebook can run either locally or in a Kubernetes cluster, and the notebook works in the same way in both cases.
+
+One of the defining differences between Cowait notebooks and regular notebooks is the access to the local file system. When starting a Cowait notebook from the command line it will get access to the current working directory. This is also true if the notebook runs on a cluster. The files are accessed over the network, and the notebook will not be able to tell that the files are in fact on your computer and not on the computer in the cluster. This is not the case with regular notebooks, in which a separate storage provider would be needed.
+
+In this lab you will learn how to use Cowait Notebooks by creating a simple, yet realistic, project. The notebooks will run on a Kubernetes cluster, but all the files will be on your computer. The lab takes around 20 minutes.
 
 ## Preparations
 
