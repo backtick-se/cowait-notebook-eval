@@ -1,8 +1,12 @@
 # Cowait Notebook Evaluation
 
+## Introduction
+
+**TODO: Write about what Cowait is, what cowait notebooks are and what this lab is about**
+
 ## Preparations
 
-Please complete the following steps before the evaluation session.
+Please complete the following steps before proceeding.
 
 ### Prerequisite Software
 - git
@@ -60,13 +64,13 @@ The goal of part one is to create a notebook that computes a value we are intere
    ```bash
    $ cowait notebook --cluster demo
    ```
-   It might take a few minutes for the cluster to download the image. Once the task is running, a link should be displayed. Open it to access the notebook.
+   It might take a few minutes for the cluster to download the image. Once the task is running, a link will be displayed. Open it to access the notebook.
 
 1. Create a new notebook called `volume.ipynb`. Make sure to select the Cowait kernel.
 
 1. Take a moment to appreciate the magic of `clientfs`
 
-   **TODO: How? Briefly explain clientfs**
+   **TODO: How? Briefly explain clientfs. Also, this should probably not be done here. Maybe put it before the test?**
 
 1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex cryptocurrency derivatives platform, divided into one file per day. 
 
@@ -83,22 +87,24 @@ The goal of part one is to create a notebook that computes a value we are intere
    print(volume)
    ```
 
-1. Parameterize the notebook by changing the date variable to an input parameter. In Cowait, *inputs* allow us to send arguments to tasks. Later, we can substitute the input value to execute the notebook code for any date we like. If no input is set, the default value `20210101` will be used.
+1. Parameterize the notebook by changing the date variable to an input parameter:
   
    ```python
    date = cowait.input('date', '20210101')
    ```
 
-1. Return the total volume from the notebook using `cowait.exit()`. Similarly to *inputs*, tasks can also return *outputs*. Returning an output allows us to invoke the notebook and use the computed value elsewhere.
+   In Cowait, *inputs* allow us to send arguments to tasks. Later, we can substitute the input value to execute the notebook code for any date we like. If no input is set, the default value `20210101` will be used.
+
+1. Return the total volume from the notebook using `cowait.exit()`:
 
    ```python
    cowait.exit(volume)
    ```
 
-1. Write a simple sanity test for the notebook that verifies the computation for a date with a known volume. Create a file called `test_compute_volume.py`, either with Jupyter or your favorite editor.
+   Similarly to *inputs*, tasks can also return *outputs*. Returning an output allows us to invoke the notebook and use the computed value elsewhere.
 
-   `NotebookRunner` executes a notebook file and returns any value provided to `cowait.exit()`.
-   
+1. Write a simple sanity test for the notebook that verifies the computation for a date with a known volume. Create a file called `test_compute_volume.py`, either with Jupyter or your favorite text editor:
+
    ```python
    # test_compute_volume.py
    from cowait.tasks.notebook import NotebookRunner
@@ -108,7 +114,9 @@ The goal of part one is to create a notebook that computes a value we are intere
        assert vol == 2556420
    ```
 
-1. Run the test and make sure it passes.
+   The `NotebookRunner` task executes a notebook file and returns any value provided to `cowait.exit()`.
+
+1. Open a new terminal in the same folder and run the test. Make sure it passes.
 
    ```bash
    $ cowait test
@@ -179,13 +187,19 @@ We now have a notebook for calculating the volume for one day. But what if we wa
 
 We now have a runnable notebook, and it is time to put it into production. We can run the `batch` notebook without Jupyter using the command line.
 
+1. Open a terminal in the same folder and make sure the `KUBECONFIG` environment variable is set:
+
+   ```bash
+   $ export KUBECONFIG=$(pwd)/kubeconfig.yaml
+   ```
+
 1. Before we can run tasks on the cluster we have to push an updated container image to a docker registry. This image will bundle all the code you've written along with any dependencies required to run it. It will continue to work as written, forever.
 
    ```bash
    $ cowait build --push
    ```
 
-1. The notebook can now be executed on the cluster as a batch job for a range of dates:
+1. The notebook can now be executed on the cluster as a batch job for a range of dates.
 
    ```bash
    $ cowait notebook run batch.ipynb \
@@ -195,7 +209,7 @@ We now have a runnable notebook, and it is time to put it into production. We ca
    ```
 
 ## Evaluation
-- Briefly describe your overall impression of working with Cowait notebooks.  Any questions? Any difficulties?
+- Briefly describe your overall impression of working with Cowait notebooks. Any questions? Any difficulties?
 - What solutions do you currently use for notebooks/cloud compute?
 - Breifly describe your current process of moving code from notebooks to production jobs.
 - Do you think Cowait notebooks could help improve the data science workflow in your organization? Why/why not? 
