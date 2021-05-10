@@ -14,6 +14,8 @@ Please complete the following steps before the evaluation session.
   ```bash
   $ pip3 install cowait
   ```
+  If you already have Cowait installed, make sure it is at least version 0.4.23.
+
 - Clone the demo repository:
   ```bash
   $ git clone https://github.com/backtick-se/cowait-notebook-eval
@@ -45,9 +47,9 @@ $ export KUBECONFIG=$(pwd)/kubeconfig.yaml
 
 The goal of part one is to create a notebook that computes a value we are interested in. Then, we turn the notebook into a Cowait task, so that it can be executed as a batch job.
 
-1. Create a `requirements.txt` file and add `pandas`
-
 1. Open `cowait.yml` and update the `image` setting to `<your dockerhub username>/cowait-notebook-eval`. This configures the name of the container image that will contain all our code and dependencies.
+
+1. Create a `requirements.txt` file and add `pandas`
 
 1. Build the container image, and push it to your registry:
    ```bash
@@ -69,6 +71,7 @@ The goal of part one is to create a notebook that computes a value we are intere
 1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex cryptocurrency derivatives platform, divided into one file per day. 
 
    ```python
+   import pandas
    date = '20210101'
    df = pandas.read_csv(f'https://s3-eu-west-1.amazonaws.com/public.bitmex.com/data/trade/{date}.csv.gz')
    ```
@@ -107,13 +110,13 @@ The goal of part one is to create a notebook that computes a value we are intere
 
 1. Run the test and make sure it passes.
 
-   Contrary to the notebook, the tests will run in a Docker container on your computer.
-
    ```bash
    $ cowait test
    ```
+   Contrary to the notebook, the tests will run in a Docker container on your computer.
 
 1. Now is a good time to save your progress. Since the files are available on your local machine, use your git client to create a commit.
+
    ```bash
    $ git add .
    $ git commit -m 'Volume notebook'
@@ -123,36 +126,42 @@ The goal of part one is to create a notebook that computes a value we are intere
 
 We now have a notebook for calculating the volume for one day. But what if we want to know the volume for several days? While we could create a loop and download each day in sequence, it would be much more efficient to do it all at once, in parallel.
 
-1. Create a new notebook in the same way as above (we will refer to it as `batch.ipynb`)
+1. Create a new notebook with the Cowait kernel, and call it `batch.ipynb`.
 
 1. First, we will create two input parameters and create a range of dates that we are interested in.
+
    ```python
    from helpers import daterange
 
    start = cowait.input('start', '20210101')
-   end = cowait.input('end', '20210110')
+   end = cowait.input('end', '20210104')
 
    dates = [ date for date in daterange(start, end) ]
    dates
    ```
 
 1. Then, we can create a `NotebookRunner` for each date in the list.  This will start four new tasks, each calculating the volume for one day. While these are running the notebook can perform other calculations.
+
    ```python
    subtasks = [ NotebookRunner(path='volume.ipynb', date=date) for date in dates ]
    ```
 
 1. To get the results of the calculations we need to wait for each task to finish:
+
    ```python
    # just for reference, dont try to run this
    result1 = await task1
    result2 = await task2
    ```
+
    Since we have a list of pending tasks, we can use `cowait.join`. Create a new cell with the following code:
+
    ```python
    results = await cowait.join(subtasks)
    ```
 
 1. Finally let's print the results:
+
    ```python
    print(results)
    ```
@@ -160,6 +169,7 @@ We now have a notebook for calculating the volume for one day. But what if we wa
 1. Use the `Run All Cells` feature in the `Run` menu to try out the notebook. This will run a tasks for each day in the date range, in paralell, on the cluster.
 
 1. Now is a good time to save your progress.
+
    ```bash
    $ git add .
    $ git commit -m 'Volume batch notebook'
@@ -170,16 +180,18 @@ We now have a notebook for calculating the volume for one day. But what if we wa
 We now have a runnable notebook, and it is time to put it into production. We can run the `batch` notebook without Jupyter using the command line.
 
 1. Before we can run tasks on the cluster we have to push an updated container image to a docker registry. This image will bundle all the code you've written along with any dependencies required to run it. It will continue to work as written, forever.
+
    ```bash
    $ cowait build --push
    ```
 
-2. The notebook can now be executed on the cluster as a batch job for a range of dates:
+1. The notebook can now be executed on the cluster as a batch job for a range of dates:
+
    ```bash
    $ cowait notebook run batch.ipynb \
        --cluster demo \
        --input start=20210201 \
-       --input end=20210210
+       --input end=20210207
    ```
 
 ## Evaluation
