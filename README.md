@@ -23,6 +23,7 @@ Please complete the following steps before proceeding.
 - Install Cowait:
   ```bash
   $ pip3 install cowait
+  $ docker pull cowait/task
   ```
   If you already have Cowait installed, make sure it is at least version 0.4.23.
 
@@ -73,10 +74,6 @@ The goal of part one is to create a notebook that computes a value we are intere
    It might take a few minutes for the cluster to download the image. Once the task is running, a link will be displayed. Open it to access the notebook.
 
 1. Create a new notebook called `volume.ipynb`. Make sure to select the Cowait kernel.
-
-1. Take a moment to appreciate the magic of `clientfs`
-
-   **TODO: How? Briefly explain clientfs. Also, this should probably not be done here. Maybe put it before the test?**
 
 1. Download some data into a pandas dataframe. The dataset contains every trade executed on the Bitmex cryptocurrency derivatives platform, divided into one file per day. 
 
