@@ -2,13 +2,13 @@
 
 ## Introduction
 
-Cowait is a system for packaging a project with its dependencies into a Docker image, which can then be run as a container either on the local machine or on a Kubernetes cluster. It alleviates several problems in data engineering such as dependency management, reproducibility, version control and parallel computation. Cowait runs code as tasks, and a task can start subtasks with parameters and return values. These subtasks run in parallel as separate containers, which enables parallel computation.
+Cowait is a system for packaging a project with its dependencies into a Docker image, which can then be run as a container either on the local machine or on a Kubernetes cluster. It alleviates several problems in data engineering such as dependency management, reproducibility, version control and parallel computation. Cowait runs code as containerized tasks, and a task can start subtasks with parameters and return values. These subtasks run in parallel as separate containers, which enables parallel computation.
 
-A Cowait notebook is essentially a Jupyter notebook running with a Cowait kernel. This enables the notebook to act as if it was as Cowait task, which enables it to start new Cowait tasks in parallel. The notebook can run either locally or in a Kubernetes cluster, and the notebook works in the same way in both cases.
+A Cowait notebook is essentially a Jupyter notebook running with a Cowait kernel. This enables the notebook to act as if it was as Cowait task, which means it can start new Cowait tasks in the background. The notebook can run either locally or in a Kubernetes cluster, and the notebook works in the same way in both cases.
 
-One of the defining differences between Cowait notebooks and regular notebooks is the access to the local file system. When starting a Cowait notebook from the command line it will get access to the current working directory. This is also true if the notebook runs on a cluster. The files are accessed over the network, and the notebook will not be able to tell that the files are in fact on your computer and not on the computer in the cluster. This is not the case with regular notebooks, in which a separate storage provider would be needed.
+One of the defining differences between Cowait notebooks and other cloud notebooks is the access to the local file system. When starting a Cowait notebook from the command line it will automatically receive access to the current working directory, using a networked file system set up in the background.
 
-In this lab you will learn how to use Cowait Notebooks by creating a simple, yet realistic, project. The notebooks will run on a Kubernetes cluster, but all the files will be on your computer. The lab takes around 20 minutes.
+In this lab you will learn how to use Cowait Notebooks by creating a simple, yet realistic, project. The notebooks will run on a Kubernetes cluster, but all the project files will reside on your computer. The lab takes around 20 minutes.
 
 ## Preparations
 
@@ -171,10 +171,10 @@ We now have a notebook for calculating the volume for one day. But what if we wa
    results = await cowait.join(subtasks)
    ```
 
-1. Finally let's return the results:
+1. Finally let's print the results:
 
    ```python
-   cowait.exit(results)
+   print(results)
    ```
 
 1. Use the `Run All Cells` feature in the `Run` menu to try out the notebook. This will run a tasks for each day in the date range, in paralell, on the cluster.
@@ -212,6 +212,7 @@ We now have a runnable notebook, and it is time to put it into production. We ca
    ```
 
 ## Evaluation
+- Who are you, and where do you work? What is your role?
 - Briefly describe your overall impression of working with Cowait notebooks. Any questions? Any difficulties?
 - What solutions do you currently use for notebooks/cloud compute?
 - Breifly describe your current process of moving code from notebooks to production jobs.
