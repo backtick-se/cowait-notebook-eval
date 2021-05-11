@@ -171,10 +171,10 @@ We now have a notebook for calculating the volume for one day. But what if we wa
    results = await cowait.join(subtasks)
    ```
 
-1. Finally let's print the results:
+1. Finally let's return the results:
 
    ```python
-   print(results)
+   cowait.exit(results)
    ```
 
 1. Use the `Run All Cells` feature in the `Run` menu to try out the notebook. This will run a tasks for each day in the date range, in paralell, on the cluster.
