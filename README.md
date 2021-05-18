@@ -67,7 +67,7 @@ The goal of part one is to create a notebook that computes a value we are intere
 1. We want to compute the total US dollar value of Bitcoin contracts over the course of the day. Bitcoin Perpetual Futures contracts have the ticker symbol `XBTUSD`. To do this, use pandas to find all the rows containing `XBTUSD` transactions, and sum the `size` column.
 
    ```python
-   volume = df[df.symbol == 'XBTUSD'].size.sum()
+   volume = int(df[df.symbol == 'XBTUSD'].size.sum())
    print(volume)
    ```
 
