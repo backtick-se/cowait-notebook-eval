@@ -1,6 +1,6 @@
 version: 1
 cowait:
-  image: '<your dockerhub username>/cowait-notebook-eval'
+  image: 'cowait/cowait-notebook-eval'
   features:
     notebook: true
   clusters:
