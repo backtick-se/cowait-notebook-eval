@@ -23,7 +23,6 @@ Please complete the following steps before proceeding.
 - Install Cowait:
   ```bash
   $ pip3 install cowait
-  $ docker pull cowait/task
   ```
   If you already have Cowait installed, make sure it is at least version 0.4.23.
 
