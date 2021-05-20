@@ -32,6 +32,16 @@ Please complete the following steps before proceeding.
   $ cd cowait-notebook-eval
   ```
 
+### Docker Registry
+
+You will need an image registry to distribute your code to the cluster. The easiest way is to sign up for a free account on Docker Hub at https://hub.docker.com/signup 
+
+After signing up, ensure your Docker client is logged in:
+
+```bash
+$ docker login
+```
+
 ### Cluster Configuration
 
 Participants of the evaluation study should have received a `kubeconfig.yaml` file that can be used to access the evaluation cluster. If you are not participating in the evaluation, you will have to set up your own Cowait cluster. A traefik2 reverse proxy deployment is required.
@@ -47,11 +57,20 @@ $ export KUBECONFIG=$(pwd)/kubeconfig.yaml
 
 The goal of part one is to create a notebook that computes a value we are interested in. Then, we turn the notebook into a Cowait task, so that it can be executed as a batch job.
 
+1. Open `cowait.yml` and update the `image` setting to `<your dockerhub username>/cowait-notebook-eval`. This configures the name of the container image that will contain all our code and dependencies.
+
+1. Create a `requirements.txt` file and add `pandas`
+
+1. Build the container image, and push it to your registry:
+   ```bash
+   $ cowait build --push
+   ```
+
 1. Launch a Cowait Notebook using your newly created image: 
    ```bash
    $ cowait notebook --cluster demo
    ```
-   Once the task is running, a link will be displayed. Open it to access the notebook.
+   It might take a few minutes for the cluster to download the image. Once the task is running, a link will be displayed. Open it to access the notebook.
 
 1. Create a new notebook called `volume.ipynb`. Make sure to select the Cowait kernel.
 
@@ -173,6 +192,31 @@ We now have a notebook for calculating the volume for one day. But what if we wa
    $ git commit -m 'Volume batch notebook'
    ```
 
+### Part 3: Production
+
+We now have a runnable notebook, and it is time to put it into production. We can run the `batch` notebook without Jupyter using the command line.
+
+1. Open a terminal in the same folder and make sure the `KUBECONFIG` environment variable is set:
+
+   ```bash
+   $ export KUBECONFIG=$(pwd)/kubeconfig.yaml
+   ```
+
+1. Before we can run tasks on the cluster we have to push an updated container image to a docker registry. This image will bundle all the code you've written along with any dependencies required to run it. It will continue to work as written, forever.
+
+   ```bash
+   $ cowait build --push
+   ```
+
+1. The notebook can now be executed on the cluster as a batch job for a range of dates.
+
+   ```bash
+   $ cowait notebook run batch.ipynb \
+       --cluster demo \
+       --input start=20210201 \
+       --input end=20210207
+   ```
+   
 ## Evaluation
 - Who are you, and where do you work? What is your role?
 - Briefly describe your overall impression of working with Cowait notebooks. Any questions? Any difficulties?
